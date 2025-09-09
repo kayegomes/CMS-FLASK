@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Avaliação de Equipe - Globo</title>
+    <link rel="icon" type="image/x-icon" href="faviconn.ico">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --accent-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            --warning-gradient: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            --dark-gradient: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --shadow-light: 0 8px 32px rgba(31, 38, 135, 0.37);
+            --shadow-heavy: 0 15px 35px rgba(31, 38, 135, 0.5);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.8);
+            --text-muted: rgba(255, 255, 255, 0.6);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--primary-gradient);
+            min-height: 100vh;
+            color: var(--text-primary);
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.2) 0%, transparent 50%);
+            animation: backgroundMove 20s ease-in-out infinite;
+            z-index: -1;
+        }
+
+        @keyframes backgroundMove {
+            0%, 100% { transform: translateX(0) translateY(0); }
+            25% { transform: translateX(-20px) translateY(-10px); }
+            50% { transform: translateX(20px) translateY(10px); }
+            75% { transform: translateX(-10px) translateY(20px); }
+        }
+
+        /* Header */
+        .header {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 1.5rem 2rem;
+            box-shadow: var(--shadow-light);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .logo {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow-light);
+            transition: all 0.3s ease;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .logo:hover {
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: var(--shadow-heavy);
+        }
+
+        .logo img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: contain;
+        }
+
+        .header-title {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header-title h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, #fff, #f0f8ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.25rem;
+        }
+
+        .header-title p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            font-weight: 400;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--success-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.2rem;
+            box-shadow: var(--shadow-light);
+            transition: all 0.3s ease;
+        }
+
+        .user-avatar:hover {
+            transform: scale(1.1);
+            box-shadow: var(--shadow-heavy);
+        }
+
+        .user-details h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .user-details p {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        .logout-btn {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            color: var(--text-primary);
+            padding: 0.75rem 1.5rem;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            font-weight: 500;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-light);
+        }
+
+        /* Navigation Tabs */
+        .nav-tabs {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .tab-container {
+            display: flex;
+            gap: 1rem;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            padding: 0.5rem;
+            box-shadow: var(--shadow-light);
+            border: 1px solid var(--glass-border);
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 1rem 2rem;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            font-size: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tab-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: var(--accent-gradient);
+            transition: left 0.3s ease;
+            z-index: -1;
+        }
+
+        .tab-btn:hover::before,
+        .tab-btn.active::before {
+            left: 0;
+        }
+
+        .tab-btn:hover,
+        .tab-btn.active {
+            color: var(--text-primary);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-light);
+        }
+
+        /* Main Content */
+        .main-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .content-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border-radius: 30px;
+            padding: 3rem;
+            box-shadow: var(--shadow-heavy);
+            border: 1px solid var(--glass-border);
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .content-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, #fff, #f0f8ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Evaluation Type Selector */
+        .eval-type-selector {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 3rem;
+        }
+
+        .eval-type-btn {
+            flex: 1;
+            padding: 1.5rem;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 1.1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .eval-type-btn.autoavaliacao {
+            background: var(--success-gradient);
+            color: white;
+        }
+
+        .eval-type-btn.subordinado {
+            background: var(--accent-gradient);
+            color: white;
+        }
+
+        .eval-type-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-heavy);
+        }
+
+        .eval-type-btn.active {
+            transform: scale(1.05);
+            box-shadow: var(--shadow-heavy);
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 2rem;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            font-size: 1.1rem;
+            color: var(--text-primary);
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 1.25rem;
+            border: 2px solid var(--glass-border);
+            border-radius: 15px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-select:focus {
+            outline: none;
+            border-color: rgba(255, 255, 255, 0.5);
+            box-shadow: var(--shadow-light);
+            transform: translateY(-2px);
+        }
+
+        .form-select option {
+            background: #2c3e50;
+            color: white;
+        }
+
+        /* Criteria Grid */
+        .criteria-section {
+            margin: 3rem 0;
+        }
+
+        .criteria-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 2rem;
+            text-align: center;
+            color: var(--text-primary);
+        }
+
+        .criteria-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .criteria-item {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1px solid var(--glass-border);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .criteria-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--accent-gradient);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .criteria-item:hover::before {
+            transform: scaleX(1);
+        }
+
+        .criteria-item:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-heavy);
+        }
+
+        .criteria-label {
+            font-weight: 600;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+            color: var(--text-primary);
+        }
+
+        .slider-container {
+            position: relative;
+            margin: 1.5rem 0;
+        }
+
+        .slider {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.2);
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+            transition: all 0.3s ease;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #9c27b0;
+            cursor: pointer;
+            box-shadow: var(--shadow-light);
+            transition: all 0.3s ease;
+        }
+
+        .slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            box-shadow: var(--shadow-heavy);
+        }
+
+        .slider::-moz-range-thumb {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #9c27b0;
+            cursor: pointer;
+            border: none;
+            box-shadow: var(--shadow-light);
+        }
+
+        .slider-value {
+            position: absolute;
+            top: -40px;
+            right: 0;
+            background: var(--primary-gradient);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            box-shadow: var(--shadow-light);
+        }
+
+        .slider-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        /* Text Areas */
+        .text-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+
+        .text-group {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1px solid var(--glass-border);
+            transition: all 0.3s ease;
+        }
+
+        .text-group:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-light);
+        }
+
+        .text-area {
+            width: 100%;
+            min-height: 120px;
+            padding: 1.25rem;
+            border: 2px solid var(--glass-border);
+            border-radius: 15px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-family: inherit;
+            resize: vertical;
+            transition: all 0.3s ease;
+        }
+
+        .text-area:focus {
+            outline: none;
+            border-color: rgba(255, 255, 255, 0.5);
+            box-shadow: var(--shadow-light);
+        }
+
+        .text-area::placeholder {
+            color: var(--text-muted);
+        }
+
+        /* Save Button */
+        .save-section {
+            text-align: center;
+            margin-top: 3rem;
+        }
+
+        .save-btn {
+            background: var(--success-gradient);
+            color: white;
+            border: none;
+            padding: 1.5rem 4rem;
+            border-radius: 30px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-light);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .save-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: all 0.3s ease;
+        }
+
+        .save-btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .save-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-heavy);
+        }
+
+        /* Loading State */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .tab-container {
+                flex-direction: column;
+            }
+
+            .eval-type-selector {
+                flex-direction: column;
+            }
+
+            .criteria-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .text-section {
+                grid-template-columns: 1fr;
+            }
+
+            .main-content {
+                padding: 1rem;
+            }
+
+            .content-card {
+                padding: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="loadingScreen" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--primary-gradient); display: flex; justify-content: center; align-items: center; z-index: 9999;">
+        <div style="text-align: center; color: white;">
+            <div style="width: 50px; height: 50px; border: 3px solid rgba(255,255,255,0.3); border-top: 3px solid white; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 1rem;"></div>
+            <h2>Carregando...</h2>
+            <p>Inicializando sistema de avaliação</p>
+        </div>
+    </div>
+
+    <style>
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                <div class="logo">
+                    <img src="logo-globo.jpg" alt="Logo Globo">
+                </div>
+                <div class="header-title">
+                    <h1>Sistema de Avaliação de Equipe</h1>
+                    <p>Plataforma de Gestão de Performance</p>
+                </div>
+            </div>
+            <div class="user-info">
+                <div class="user-avatar" id="userAvatar">--</div>
+                <div class="user-details">
+                    <h3 id="userName">Carregando...</h3>
+                    <p id="userCargo">Carregando...</p>
+                </div>
+                <button class="logout-btn" onclick="logout()">Sair</button>
+            </div>
+        </div>
+    </header>
+
+    <nav class="nav-tabs">
+        <div class="tab-container">
+            <button class="tab-btn active" onclick="showTab('nova-avaliacao')">Nova Avaliação</button>
+            <button class="tab-btn" onclick="showTab('minhas-avaliacoes')">Minhas Avaliações</button>
+            <button class="tab-btn" onclick="showTab('colaboradores')">Colaboradores</button>
+            <button class="tab-btn" onclick="showTab('estatisticas')">Estatísticas</button>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="content-card">
+            <!-- Nova Avaliação Tab -->
+            <div id="nova-avaliacao" class="tab-content active">
+                <h2 class="content-title">Nova Avaliação</h2>
+                
+                <div class="eval-type-selector" id="evalTypeSelector">
+                    
+                    <button class="eval-type-btn subordinado" onclick="selectEvalType('subordinado')">
+                        Avaliar Subordinado
+                    </button>
+                </div>
+
+                <form id="avaliacaoForm">
+                    <div class="form-group">
+                        <label class="form-label" for="nomeAvaliado">Nome do Avaliado</label>
+                        <select class="form-select" id="nomeAvaliado" name="avaliado_id" required>
+                            <option value="">Selecione...</option>
+                        </select>
+                    </div>
+
+                    <div class="criteria-section">
+                        <h3 class="criteria-title">Critérios de Avaliação</h3>
+                        <div class="criteria-grid">
+                            <div class="criteria-item">
+                                <label class="criteria-label">Produção</label>
+                                <div class="slider-container">
+                                    <input type="range" class="slider" id="producao" name="producao" min="0" max="10" value="5">
+                                    <div class="slider-value" id="producao-value">5</div>
+                                </div>
+                                <div class="slider-labels">
+                                    <span>0</span>
+                                    <span>10</span>
+                                </div>
+                            </div>
+
+                            <div class="criteria-item">
+                                <label class="criteria-label">Edição</label>
+                                <div class="slider-container">
+                                    <input type="range" class="slider" id="edicao" name="edicao" min="0" max="10" value="5">
+                                    <div class="slider-value" id="edicao-value">5</div>
+                                </div>
+                                <div class="slider-labels">
+                                    <span>0</span>
+                                    <span>10</span>
+                                </div>
+                            </div>
+
+                            <div class="criteria-item">
+                                <label class="criteria-label">Coordenação</label>
+                                <div class="slider-container">
+                                    <input type="range" class="slider" id="coordenacao" name="coordenacao" min="0" max="10" value="5">
+                                    <div class="slider-value" id="coordenacao-value">5</div>
+                                </div>
+                                <div class="slider-labels">
+                                    <span>0</span>
+                                    <span>10</span>
+                                </div>
+                            </div>
+                            <div class="criteria-item">
+                                <label class="criteria-label">Co-coordenação</label>
+                                <div class="slider-container">
+                                    <input type="range" class="slider" id="co_coordenacao" name="co_coordenacao" min="0" max="10" value="5">
+                                    <div class="slider-value" id="co_coordenacao-value">5</div>
+                                </div>
+                                <div class="slider-labels">
+                                    <span>0</span>
+                                    <span>10</span>
+                                </div>
+                            </div>
+
+                            <div class="criteria-item">
+                                <label class="criteria-label">Pró-atividade</label>
+                                <div class="slider-container">
+                                    <input type="range" class="slider" id="pro_atividade" name="pro_atividade" min="0" max="10" value="5">
+                                    <div class="slider-value" id="pro_atividade-value">5</div>
+                                </div>
+                                <div class="slider-labels">
+                                    <span>0</span>
+                                    <span>10</span>
+                                </div>
+                            </div>
+
+                            <div class="criteria-item">
+                                <label class="criteria-label">Criatividade</label>
+                                <div class="slider-container">
+                                    <input type="range" class="slider" id="criatividade" name="criatividade" min="0" max="10" value="5">
+                                    <div class="slider-value" id="criatividade-value">5</div>
+                                </div>
+                                <div class="slider-labels">
+                                    <span>0</span>
+                                    <span>10</span>
+                                </div>
+                            </div>
+
+                            <div class="criteria-item">
+                                <label class="criteria-label">Resolução de Problemas/Gerenciamento<br>de crises</label>
+                                <div class="slider-container">
+                                    <input type="range" class="slider" id="resolucao_problemas" name="resolucao_problemas" min="0" max="10" value="5">
+                                    <div class="slider-value" id="resolucao_problemas-value">5</div>
+                                </div>
+                                <div class="slider-labels">
+                                    <span>0</span>
+                                    <span>10</span>
+                                </div>
+                            </div>
+
+                            <div class="criteria-item">
+                                <label class="criteria-label">Flexibilidade / Adaptabilidade</label>
+                                <div class="slider-container">
+                                    <input type="range" class="slider" id="flexibilidade_adaptabilidade" name="flexibilidade_adaptabilidade" min="0" max="10" value="5">
+                                    <div class="slider-value" id="flexibilidade_adaptabilidade-value">5</div>
+                                </div>
+                                <div class="slider-labels">
+                                    <span>0</span>
+                                    <span>10</span>
+                                </div>
+                            </div>
+
+                            <div class="criteria-item">
+                                <label class="criteria-label">Relacionamento com Equipe</label>
+                                <div class="slider-container">
+                                    <input type="range" class="slider" id="relacionamento_equipe" name="relacionamento_equipe" min="0" max="10" value="5">
+                                    <div class="slider-value" id="relacionamento_equipe-value">5</div>
+                                </div>
+                                <div class="slider-labels">
+                                    <span>0</span>
+                                    <span>10</span>
+                                </div>
+                            </div>
+
+                            <div class="criteria-item">
+                                <label class="criteria-label">Relacionamento C/ Outras Áreas</label>
+                                <div class="slider-container">
+                                    <input type="range" class="slider" id="relacionamento_outras_areas" name="relacionamento_outras_areas" min="0" max="10" value="5">
+                                    <div class="slider-value" id="relacionamento_outras_areas-value">5</div>
+                                </div>
+                                <div class="slider-labels">
+                                    <span>0</span>
+                                    <span>10</span>
+                                </div>
+                            </div>
+
+                            <div class="criteria-item">
+                                <label class="criteria-label">Inteligência Emocional</label>
+                                <div class="slider-container">
+                                    <input type="range" class="slider" id="inteligencia_emocional" name="inteligencia_emocional" min="0" max="10" value="5">
+                                    <div class="slider-value" id="inteligencia_emocional-value">5</div>
+                                </div>
+                                <div class="slider-labels">
+                                    <span>0</span>
+                                    <span>10</span>
+                                </div>
+                            </div>
+                            <div class="criteria-item">
+                                <label class="criteria-label">Liderança</label>
+                                <div class="slider-container">
+                                    <input type="range" class="slider" id="lideranca" name="lideranca" min="0" max="10" value="5">
+                                    <div class="slider-value" id="lideranca-value">5</div>
+                                </div>
+                                <div class="slider-labels">
+                                    <span>0</span>
+                                    <span>10</span>
+                                </div>
+                            </div>
+                            <div class="criteria-item">
+                                <label class="criteria-label">Visão Institucional</label>
+                                <div class="slider-container">
+                                    <input type="range" class="slider" id="visao_institucional" name="visao_institucional" min="0" max="10" value="5">
+                                    <div class="slider-value" id="visao_institucional-value">5</div>
+                                </div>
+                                <div class="slider-labels">
+                                    <span>0</span>
+                                    <span>10</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-section">
+                        <div class="text-group">
+                            <label class="form-label" for="pontos_fortes">Pontos Fortes</label>
+                            <textarea class="text-area" id="pontos_fortes" name="pontos_fortes" placeholder="Descreva os principais pontos fortes do avaliado..."></textarea>
+                        </div>
+                        <div class="text-group">
+                            <label class="form-label" for="pontos_desenvolver">Pontos a Desenvolver</label>
+                            <textarea class="text-area" id="pontos_desenvolver" name="pontos_desenvolver" placeholder="Descreva os pontos que podem ser desenvolvidos..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="save-section">
+                        <button type="submit" class="save-btn">Salvar Avaliação</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Minhas Avaliações Tab -->
+            <div id="minhas-avaliacoes" class="tab-content">
+                <h2 class="content-title">Minhas Avaliações</h2>
+                <div id="avaliacoesList">
+                    <p style="text-align: center; color: var(--text-secondary); margin: 2rem 0;">
+                        Carregando avaliações...
+                    </p>
+                </div>
+            </div>
+
+            <!-- Colaboradores Tab -->
+            <div id="colaboradores" class="tab-content">
+                <h2 class="content-title">Colaboradores</h2>
+                <div id="colaboradoresList">
+                    <p style="text-align: center; color: var(--text-secondary); margin: 2rem 0;">
+                        Carregando colaboradores...
+                    </p>
+                </div>
+            </div>
+
+            <!-- Estatísticas Tab -->
+            <div id="estatisticas" class="tab-content">
+                <h2 class="content-title">Estatísticas</h2>
+                <div id="estatisticasContent">
+                    <p style="text-align: center; color: var(--text-secondary); margin: 2rem 0;">
+                        Carregando estatísticas...
+                    </p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
+
